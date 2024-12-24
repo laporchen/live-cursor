@@ -17,5 +17,9 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.12.2"
-  }
+  },
+  "workspaces": [
+    ".",
+    "./worker"
+  ]
 }
