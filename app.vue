@@ -1,9 +1,22 @@
 <template>
   <div class="relative bg-gray-500 h-[2000px] w-[2000px] overflow-hidden">
     <div class="w-full h-40 p-4">
-      <h1 class="text-2xl font-bold"> Live Cursor Testing </h1>
-      <h1 class="text-xl"> Id: {{ id }} </h1>
-      <div class="text-lg"> Drag to create rectangle, right click to delete. </div>
+      <div class="text-2xl font-bold"> Live Cursor Testing </div>
+      <div class="flex items-center gap-2"> 
+        <div
+          class="w-4 h-4 rounded-full shadow-[0_0_5px_5px]"
+          :class="{
+            'bg-green-500 shadow-green-400': isReady,
+            'bg-red-500 shadow-red-400': !isReady,
+          }"
+        >
+        </div>
+          {{ isReady ? 'Connected' : 'Not connected'}}
+      </div>
+      <template v-if="isReady">
+        <div class="text-xl"> Id: {{ id }} </div>
+        <div class="text-lg"> Drag to create rectangle, right click to delete. </div>
+      </template>
     </div>
     <template v-for="session in sessions" :key="session.id">
       <div
@@ -36,7 +49,7 @@
   import { useMouse, useEventListener } from '@vueuse/core'
 
   const { x, y }= useMouse({ type: 'page' })
-  const { id, sessions, squares, addSquare, deleteSquare, getWs } = useWs({ x, y })
+  const { id, sessions, squares, addSquare, deleteSquare, getWs, isReady } = useWs({ x, y })
   onMounted(() => getWs())
 
   function generatedColor() {
