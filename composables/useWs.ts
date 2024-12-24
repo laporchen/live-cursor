@@ -58,7 +58,9 @@ export default function useWs(option: Option) {
   }, { throttle: 50 })
 
   async function getWs() {
-    ws.value = new WebSocket(`ws://localhost:8787/ws?id=${id}`)
+    const config = useRuntimeConfig()
+    console.log(config.public)
+    ws.value = new WebSocket(`ws://${config.public.wsUrl}/ws?id=${id}`)
     ws.value.onopen = () => {
       console.log('connected')
       isReady.value = true

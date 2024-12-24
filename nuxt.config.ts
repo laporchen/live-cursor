@@ -8,5 +8,10 @@ export default defineNuxtConfig({
     prerender: {
       autoSubfolderIndex: false
     }
+  },
+  runtimeConfig: {
+    public: {
+      wsUrl: ''
+    }
   }
 })
