@@ -4,4 +4,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
   ssr: false,
+  nitro: {
+    prerender: {
+      autoSubfolderIndex: false
+    }
+  }
 })
