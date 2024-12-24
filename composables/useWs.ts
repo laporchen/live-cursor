@@ -5,7 +5,7 @@ interface Option {
   y: Ref<number>
 }
 export default function useWs(option: Option) {
-  const id = `${Math.floor(Math.random() * 69420 % 512)}`
+  const id = `${Math.floor(Math.random() * 69420 % 100 + 1)}`
 
   const ws = ref<WebSocket>()
   const isReady = ref(false)
@@ -48,7 +48,6 @@ export default function useWs(option: Option) {
 
   watchThrottled([option.x, option.y], ([x, y]) => {
     if (!isReady.value) return
-    console.log('send')
     const msg: WsMessage = {
       type: 'move',
       id,
@@ -56,7 +55,7 @@ export default function useWs(option: Option) {
       y
     }
     ws.value!.send(JSON.stringify(msg))
-  }, { throttle: 10 })
+  }, { throttle: 50 })
 
   async function getWs() {
     ws.value = new WebSocket(`ws://localhost:8787/ws?id=${id}`)
@@ -95,6 +94,7 @@ export default function useWs(option: Option) {
   }
 
   return {
+    id,
     sessions,
     squares,
     getWs,
