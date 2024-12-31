@@ -22,12 +22,10 @@ export type WsMessage = WsSession | WsSquare
 
 export class CollabSessions extends DurableObject {
 	sessions: Map<WebSocket, Session>
-	squares: Map<number, Square>
 	nextSquareId: number = 0
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
-		this.squares = new Map()
 		this.sessions = new Map()
 		this.ctx.getWebSockets().forEach((ws) => {
       const meta = ws.deserializeAttachment()
@@ -49,6 +47,7 @@ export class CollabSessions extends DurableObject {
 		const parsedMessage: WsMessage = JSON.parse(message)
 		const session = this.sessions.get(ws)
 		if (!session) return
+		const squares = (await this.ctx.storage.get<Map<number, Square>>('squares')) || (new Map<number, Square>())
 
 		switch (parsedMessage.type) {
 			case 'message':
@@ -71,22 +70,24 @@ export class CollabSessions extends DurableObject {
 			case 'add-square':
 				const squareData = parsedMessage.square
 				const square = { id: this.nextSquareId, ...squareData }
-				this.squares.set(this.nextSquareId, square)
+				squares.set(this.nextSquareId, square)
 				this.nextSquareId = this.nextSquareId + 1
 				const broadcastMsg: WsMessage = { type: 'add-square', id: session.id, square, squareId: square.id }
 				this.broadcast(broadcastMsg)
+				this.ctx.storage.put('squares', squares)
 				break
 			case 'delete-square':
 				const id = parsedMessage.squareId
-				this.squares.delete(id)
+				squares.delete(id)
 				this.broadcast(parsedMessage)
+				this.ctx.storage.put('squares', squares)
 				break
 			case 'get-squares':
-				const squares: Square[] = []
-				this.squares.forEach((square) => {
-					squares.push(square)
+				const squaresArr: Square[] = []
+				squares.forEach((square) => {
+					squaresArr.push(square)
 				})
-				const squareRes : WsMessage = { type: 'get-squares-response', squares }
+				const squareRes : WsMessage = { type: 'get-squares-response', squares: squaresArr }
 				ws.send(JSON.stringify(squareRes))
 				break
 		}
